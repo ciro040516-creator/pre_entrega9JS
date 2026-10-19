@@ -62,9 +62,9 @@ const ingreso = document.getElementById('boton');
 const cajaBuscador = document.getElementById("container-buscador")
 const itemBusqueda = document.getElementById("buscador-Item");
 
-ingreso.addEventListener('click', function acceso(ciclo){
+ingreso.addEventListener('click', function acceso(e){
 
-    ciclo.preventDefault();
+    e.preventDefault();
 
 const ingresoId = Number(inputID.value); 
 const ingresoPassword = Number(inputPassword.value);
@@ -72,11 +72,19 @@ const ingresoPassword = Number(inputPassword.value);
 const usuariosHabilitados = loginFree.find((user) => user.id === ingresoId)
 
                 if (usuariosHabilitados && usuariosHabilitados.password === ingresoPassword){
-                    //calendario
+                    //aviso espontaneo de ingreso
                     const mainMensaje = document.querySelector('main');
-                    mainMensaje.innerHTML =`
-                    <input type="date" id="fecha" class="form-Calendario">
-                    `;
+                    mainMensaje.innerHTML =``;
+
+                    const avisoExito = document.createElement("div");
+                    avisoExito.className = "mensaje-espontaneo";
+                    avisoExito.innerHTML = `¡Bienvenido! Ya puedes empezar a cargar los datos de tus repartos en el item 'Registro'.`;
+                    mainMensaje.prepend(avisoExito);
+
+                    setTimeout(() => {
+                    avisoExito.remove();
+                    }, 3000)
+
                     //guia
                     document.getElementById("caja-Ayuda").style.display = "block";
                     processMenu(repartosMenu);
@@ -99,20 +107,14 @@ const usuariosHabilitados = loginFree.find((user) => user.id === ingresoId)
         }
     });
 });
-} 
-else if ((ingresoId === 101 && ingresoPassword === 101000) || 
-        (ingresoId === 102 && ingresoPassword === 101001) || 
-        (ingresoId === 103 && ingresoPassword === 101002)) {
+} else if ((ingresoId === 101 && ingresoPassword === 101000) || 
+            (ingresoId === 102 && ingresoPassword === 101001) || 
+            (ingresoId === 103 && ingresoPassword === 101002)) {
 
-                            //const menuRepartidor = repartosMenu.concat('Novedades');
-                            //processMenu(menuRepartidor);
-
-                            const mainMensaje = document.querySelector('main');
-                            mainMensaje.className = "mensaje-general"; 
-                            mainMensaje.innerHTML += `¡Bienvenido! Para comenzar, haz clic en Registro y añade los remitos/facturas de tu reparto.`;
+                            const menuRepartidor = repartosMenu.concat(['Novedades']); //ver el porque no funciona!
+                            processMenu(menuRepartidor);
 
                             } else {
-
                                 const formInicial = document.querySelector('.form-Ingreso');
                                 const mainAviso = document.querySelector('main');
     //Oculta el formulario
@@ -232,6 +234,7 @@ function borrarRemito(fila) {
 function añadirRemito(e) {
     if (e) e.preventDefault();
 
+try{
     const newRemito = {
     numero: document.getElementById("nuevoNumero").value.trim(),
     nombre: document.getElementById("nuevoNombre").value.trim(),
@@ -240,9 +243,8 @@ function añadirRemito(e) {
     };
 
     const { numero, nombre, direccion, monto } = newRemito;
-
     if (!numero || !nombre || !direccion || !monto) {
-    return;
+    throw new Error("Todos los campos son obligatorios.");
     }
 
 const listaActual = JSON.parse(localStorage.getItem("Datos Lista")) || [];
@@ -251,11 +253,6 @@ listaActual.push(newRemito);
 localStorage.setItem("Datos Lista", JSON.stringify(listaActual));
 
 tablaActual();
-
-document.getElementById("nuevoNumero").value = "";
-document.getElementById("nuevoNombre").value = "";
-document.getElementById("nuevaDireccion").value = "";
-document.getElementById("nuevoMonto").value = "";
 
 const avisoExito = document.getElementById("mensaje-exito");
     if (avisoExito) {
@@ -266,6 +263,20 @@ const avisoExito = document.getElementById("mensaje-exito");
             avisoExito.innerText = ""; 
         }, 3000); 
     }
+
+} catch (error) {
+        const avisoExito = document.getElementById("mensaje-exito");
+        if (avisoExito) {
+            avisoExito.innerText = `⚠️ Error: ${error.message}`;
+        }
+
+} finally {
+        document.getElementById("nuevoNumero").value = "";
+        document.getElementById("nuevoNombre").value = "";
+        document.getElementById("nuevaDireccion").value = "";
+        document.getElementById("nuevoMonto").value = "";
+
+}
 };
 
 window.añadirRemito = añadirRemito;
